@@ -9,13 +9,13 @@ import requests
 # print (data.status_code)
 # print (data.json())
 
-data = requests.post('http://127.0.0.1:8000/api/v1/adv', json={
-"title": "Test 1 Docker",
-"description": "Testing API in container",
-"price": 250,
-"author": "User"})
-print (data.status_code)
-print (data.json())
+# data = requests.post('http://127.0.0.1:8000/api/v1/adv', json={
+# "title": "Test 1 Docker",
+# "description": "Testing API in container",
+# "price": 250,
+# "author": "User"})
+# print (data.status_code)
+# print (data.json())
 
 
 
@@ -36,14 +36,30 @@ print (data.json())
 # print (data.status_code)
 # print (data.json())
 
-# response = requests.get('http://127.0.0.1:8000/api/v1/adv', 
-#                        params={
-#                            'price_from': 100,
-#                            'price_to': 500
-#                        })
-# print("\nSearch by price range:")
-# print(response.status_code)
-# print(response.json())
+
+
+data = requests.post('http://127.0.0.1:8000/api/v1/user', json={'name': 'admin1', 'password': '1234'})
+print(data.status_code)
+print(data.text)
+print(data.json())
+
+data = requests.post('http://127.0.0.1:8000/api/v1/user/login', json={'name': 'admin1', 'password': '1234'})
+print(data.status_code)
+print(data.json())
+token = data.json()['token']
+
+data = requests.post('http://127.0.0.1:8000/api/v1/adv', json={'title': 'adv_1', 'description': 'Testing',
+'price': 250, 'author': 'admin1'}, headers={'x-token': token})
+print(data.status_code)
+if data.status_code == 200:
+    print(data.json())
+else:
+    print("Ошибка:", data.text) 
+
+
+# data = requests.get('http://127.0.0.1:8000/api/v1/adv/3', headers={'x-token': token})
+# print(data.status_code)
+# print(data.json())
 
 
 

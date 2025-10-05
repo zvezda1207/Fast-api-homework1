@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Literal
+import uuid
 
 
 class SuccessResponse(BaseModel):
@@ -37,4 +38,38 @@ class SearchAdvResponse(BaseModel):
 
 class DeleteAdvResponse(SuccessResponse):
     pass
+
+class BaseUserRequest(BaseModel):
+    name: str
+    password: str
+
+class LoginRequest(BaseUserRequest):
+    pass 
+
+class LoginResponse(BaseModel):
+    token: uuid.UUID    
+
+class CreateUserRequest(BaseUserRequest):
+    pass 
+
+class CreateUserResponse(BaseModel):
+    id: int
+
+class GetUserResponse(BaseModel):
+    id: int
+    name: str
+    role: str
+
+class UpdateUserResponse(SuccessResponse):
+    pass
+
+class UpdateUserRequest(BaseModel):
+    name: str | None = None
+    password: str | None = None
+    role: str | None = None
+
+class DeleteUserResponse(SuccessResponse):
+    pass
+
+
 

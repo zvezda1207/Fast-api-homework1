@@ -5,6 +5,8 @@ COPY requirements.txt /requirements.txt
 RUN pip install -r requirements.txt
 
 COPY ./app /app
-WORKDIR /app
+COPY alembic.ini /alembic.ini
+COPY ./alembic /alembic
+WORKDIR /
 
-ENTRYPOINT ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "80"]
+ENTRYPOINT ["uvicorn", "app.server:app", "--host", "0.0.0.0", "--port", "80"]

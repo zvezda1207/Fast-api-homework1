@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from models import ORM_OBJ, ORM_CLS, Adv
+from .models import ORM_OBJ, ORM_CLS, Adv
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -18,7 +18,10 @@ async def update_item(session: AsyncSession, item: ORM_OBJ):
         raise HTTPException(409, 'Update conflict')
 
 async def get_item_by_id(session: AsyncSession, orm_cls: ORM_CLS, item_id: int) -> ORM_OBJ:
-    orm_obj = await session.get(orm_cls, item_id)
+    from sqlalchemy import select
+    query = select(orm_cls).where(orm_cls.id == item_id)
+    result = await session.execute(query)
+    orm_obj = result.scalars().unique().first()
     if orm_obj is None:
         raise HTTPException(404, f'Item not found')
     return orm_obj

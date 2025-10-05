@@ -66,3 +66,53 @@ logs/
 migrations/
 
 staticfiles/
+
+# Docker
+.docker/
+docker-compose.override.yml
+.dockerignore
+
+# Database
+*.db
+*.sqlite3
+*.sql
+pg_hba.conf
+pg_hba.conf.txt
+
+# Alembic
+alembic/versions/*.py
+!alembic/versions/.gitkeep
+
+# FastAPI specific
+.pytest_cache/
+test_*.py
+*_test.py
+tests/__pycache__/
+
+# IDE specific
+.vscode/settings.json
+.vscode/launch.json
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
+.idea/shelf
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*~
+
+# Local development
+.local/
+local_settings.py
