@@ -67,18 +67,12 @@ class Adv(Base):
 ORM_OBJ = Adv | User | Token
 ORM_CLS = type[Adv] |type[User] | type[Token]
 
-# async def init_orm():
-#     print('INIT ORM STARTING')
-#     async with engine.begin() as conn:
-#         print("Creating tables...")
-#         await conn.run_sync(Base.metadata.create_all)
-#         print("Tables created.")
 
 async def init_orm():
     print("INIT ORM STARTING")
     async with engine.begin() as conn:
         print("Checking database connection...")
-        await conn.execute(text("SELECT 1"))  # Оберните строку в text()
+        await conn.execute(text("SELECT 1"))  
         print("Creating tables...")
         await conn.run_sync(Base.metadata.create_all)
         print("Tables created.")

@@ -4,7 +4,7 @@ from .schema import (CreateAdvRequest, UpdateAdvRequest, CreateAdvResponse, Upda
                      CreateUserRequest, CreateUserResponse, GetUserResponse, UpdateUserResponse, 
                      UpdateUserRequest, DeleteUserResponse)
 from .lifespan import lifespan
-from sqlalchemy import select, DateTime
+from sqlalchemy import select
 
 from .dependency import SessionDependency, TokenDependency, OptionalTokenDependency
 from .constants import SUCCESS_RESPONSE
@@ -33,14 +33,6 @@ async def create_adv_simple(adv: CreateAdvRequest, session: SessionDependency, t
         import traceback
         traceback.print_exc()
         raise
-
-
-# @app.post('/api/v1/adv', tags=['adv'], response_model=CreateAdvResponse)
-# async def create_adv(adv: CreateAdvRequest, session: SessionDependency, token: TokenDependency):
-#     adv_dict = adv.model_dump(exclude_unset=True)
-#     adv_orm_obj = models.Adv(**adv_dict, user_id=token.user_id)
-#     await crud.add_item(session, adv_orm_obj)
-#     return adv_orm_obj.id_dict
 
 @app.post('/api/v1/adv', tags=['adv'], response_model=CreateAdvResponse)
 async def create_adv(adv: CreateAdvRequest, session: SessionDependency, token: TokenDependency):
@@ -151,9 +143,6 @@ async def create_user(user_data: CreateUserRequest, session: SessionDependency):
     await crud.add_item(session, user_orm_obj)
     return user_orm_obj.dict
 
-
-
-
 @app.get('/api/v1/user/{user_id}', tags=['user'], response_model=GetUserResponse)
 async def get_user(user_id: int, session: SessionDependency, token: TokenDependency = None):
     user_orm_obj = await crud.get_item_by_id(session, models.User, user_id)
@@ -166,7 +155,6 @@ async def get_user(user_id: int, session: SessionDependency, token: TokenDepende
     if token.user.role == 'admin' or user_orm_obj.id == token.user_id:
         return user_orm_obj.dict
     raise HTTPException(403, 'Insufficient privileges')
-
 
 @app.patch('/api/v1/user/{user_id}', response_model=UpdateUserResponse)
 async def update_user(user_id: int, user_data: UpdateUserRequest, session: SessionDependency, token: TokenDependency):

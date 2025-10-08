@@ -1,5 +1,5 @@
 import datetime
-from typing import Annotated
+from typing import Annotated, Optional
 import uuid
 from fastapi import Depends, HTTPException, Header
 from fastapi import Depends
@@ -7,7 +7,7 @@ from .models import Session, Token
 from .config import TOKEN_TTL_SEC
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from typing import Optional
+
 
 async def get_session() -> AsyncSession:
     async with Session() as session:
