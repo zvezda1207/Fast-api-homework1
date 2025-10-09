@@ -38,18 +38,18 @@ import requests
 
 
 
-data = requests.post('http://127.0.0.1:8000/api/v1/user', json={'name': 'admin1', 'password': '1234'})
+data = requests.post('http://127.0.0.1:8000/api/v1/user', json={'name': 'admin2', 'password': '1234'})
 print(data.status_code)
 print(data.text)
 print(data.json())
 
-data = requests.post('http://127.0.0.1:8000/api/v1/user/login', json={'name': 'admin1', 'password': '1234'})
+data = requests.post('http://127.0.0.1:8000/api/v1/user/login', json={'name': 'admin2', 'password': '1234'})
 print(data.status_code)
 print(data.json())
 token = data.json()['token']
 
-data = requests.post('http://127.0.0.1:8000/api/v1/adv', json={'title': 'adv_1', 'description': 'Testing',
-'price': 250, 'author': 'admin1'}, headers={'x-token': token})
+data = requests.post('http://127.0.0.1:8000/api/v1/adv', json={'title': 'Phone', 'description': 'New phone',
+'price': 250, 'author': 'admin2'}, headers={'x-token': token})
 print(data.status_code)
 if data.status_code == 200:
     print(data.json())

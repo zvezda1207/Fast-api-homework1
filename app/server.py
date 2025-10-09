@@ -20,20 +20,6 @@ app = FastAPI(title='Adv API', description='API for managing advertisements', li
 async def test():
     return {'message': 'Test endpoint works'}
 
-@app.post('/api/v1/adv/simple')
-async def create_adv_simple(adv: CreateAdvRequest, session: SessionDependency, token: TokenDependency):
-    try:
-        print(f"Creating adv with token: {token.user_id}")
-        adv_dict = adv.model_dump(exclude_unset=True)
-        adv_orm_obj = models.Adv(**adv_dict, user_id=token.user_id)
-        await crud.add_item(session, adv_orm_obj)
-        return {'id': adv_orm_obj.id}
-    except Exception as e:
-        print(f"Error in simple create: {e}")
-        import traceback
-        traceback.print_exc()
-        raise
-
 @app.post('/api/v1/adv', tags=['adv'], response_model=CreateAdvResponse)
 async def create_adv(adv: CreateAdvRequest, session: SessionDependency, token: TokenDependency):
     try:
@@ -59,14 +45,8 @@ async def create_adv(adv: CreateAdvRequest, session: SessionDependency, token: T
 @app.patch('/api/v1/adv/{adv_id}', response_model=UpdateAdvResponse)
 async def update_adv(adv_id: int, adv_data: UpdateAdvRequest, session: SessionDependency, token: TokenDependency):
     adv_orm_obj = await crud.get_item_by_id(session, models.Adv, adv_id)
-    
-    # Загружаем пользователя для проверки роли
-    user_query = select(models.User).where(models.User.id == token.user_id)
-    user_result = await session.execute(user_query)
-    user = user_result.scalars().unique().first()
-    
-    # Проверяем права: только admin или автор объявления
-    if user.role != 'admin' and adv_orm_obj.user_id != token.user_id:
+     # Проверяем права: только admin или автор объявления    
+    if token.user.role != 'admin' and adv_orm_obj.user_id != token.user_id:
         raise HTTPException(403, 'Insufficient privileges')
     
     adv_dict = adv_data.model_dump(exclude_unset=True)
@@ -77,18 +57,9 @@ async def update_adv(adv_id: int, adv_data: UpdateAdvRequest, session: SessionDe
 
 @app.get('/api/v1/adv/{adv_id}', tags=['adv'], response_model=GetAdvResponse)
 async def get_adv(adv_id: int, session: SessionDependency, token: OptionalTokenDependency = None):
-    adv_orm_obj = await crud.get_item_by_id(session, models.Adv, adv_id)
+    adv_orm_obj = await crud.get_item_by_id(session, models.Adv, adv_id)    
+    return adv_orm_obj.dict
     
-    # Неавторизованные пользователи могут видеть все объявления
-    if token is None:
-        return adv_orm_obj.dict
-    
-    # Авторизованные пользователи могут видеть свои объявления или admin может видеть все
-    if token.user.role == 'admin' or adv_orm_obj.user_id == token.user_id:
-        return adv_orm_obj.dict
-    
-    raise HTTPException(403, 'Insufficient privileges')
-
 @app.get('/api/v1/adv', response_model=SearchAdvResponse)
 async def search_adv(
     session: SessionDependency, 
@@ -126,12 +97,10 @@ async def search_adv(
 
 @app.delete('/api/v1/adv/{adv_id}', response_model=DeleteAdvResponse)
 async def delete_adv(adv_id: int, session: SessionDependency, token: TokenDependency):
-    adv_orm_obj = await crud.get_item_by_id(session, models.Adv, adv_id)
-    
+    adv_orm_obj = await crud.get_item_by_id(session, models.Adv, adv_id)    
     # Проверяем права: только admin или автор объявления
     if token.user.role != 'admin' and adv_orm_obj.user_id != token.user_id:
-        raise HTTPException(403, 'Insufficient privileges')
-    
+        raise HTTPException(403, 'Insufficient privileges')    
     await crud.delete_item(session, adv_orm_obj)
     return SUCCESS_RESPONSE
 
@@ -144,28 +113,18 @@ async def create_user(user_data: CreateUserRequest, session: SessionDependency):
     return user_orm_obj.dict
 
 @app.get('/api/v1/user/{user_id}', tags=['user'], response_model=GetUserResponse)
-async def get_user(user_id: int, session: SessionDependency, token: TokenDependency = None):
-    user_orm_obj = await crud.get_item_by_id(session, models.User, user_id)
-    
-    # Если токен не предоставлен, разрешаем доступ (неавторизованный пользователь)
-    if token is None:
-        return user_orm_obj.dict
-    
-    # Если токен предоставлен, проверяем права
-    if token.user.role == 'admin' or user_orm_obj.id == token.user_id:
-        return user_orm_obj.dict
-    raise HTTPException(403, 'Insufficient privileges')
+async def get_user(user_id: int, session: SessionDependency, token: OptionalTokenDependency = None):
+    user_orm_obj = await crud.get_item_by_id(session, models.User, user_id)    
+    return user_orm_obj.dict
+
 
 @app.patch('/api/v1/user/{user_id}', response_model=UpdateUserResponse)
 async def update_user(user_id: int, user_data: UpdateUserRequest, session: SessionDependency, token: TokenDependency):
-    user_orm_obj = await crud.get_item_by_id(session, models.User, user_id)
-    
+    user_orm_obj = await crud.get_item_by_id(session, models.User, user_id)    
     # Проверяем права: только admin или сам пользователь
     if token.user.role != 'admin' and user_orm_obj.id != token.user_id:
-        raise HTTPException(403, 'Insufficient privileges')
-    
-    user_dict = user_data.model_dump(exclude_unset=True)
-    
+        raise HTTPException(403, 'Insufficient privileges')    
+    user_dict = user_data.model_dump(exclude_unset=True)    
     # Если обновляется пароль, хешируем его
     if 'password' in user_dict:
         user_dict['password'] = hash_password(user_dict['password'])
