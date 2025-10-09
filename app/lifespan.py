@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from .models import init_orm, close_orm, engine
+from .models import init_orm, close_orm
 
 
 @asynccontextmanager
@@ -11,7 +11,3 @@ async def lifespan(app: FastAPI):
     await close_orm()
     print('FINISH LIFESPAN')
 
-async def close_orm():
-    print("Closing ORM...")
-    await engine.dispose()
-    print("ORM Closed.")
